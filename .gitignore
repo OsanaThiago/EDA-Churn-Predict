@@ -2,14 +2,15 @@
 __pycache__/
 *.py[codz]
 *$py.class
-*.txt
 *.db
 mlartifacts
 data/
 # C extensions
 *.so
 model.ipynb
-
+/models/
+varia
+teste.py
 # Distribution / packaging
 .Python
 build/

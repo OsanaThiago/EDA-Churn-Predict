@@ -1,9 +1,8 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 import mlflow
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
-from sklearn.tree import DecisionTreeClassifier, plot_tree 
+from sklearn.tree import DecisionTreeClassifier
 from xgboost import XGBClassifier
 from sklearn.ensemble import RandomForestClassifier 
 

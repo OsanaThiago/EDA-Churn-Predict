@@ -1,0 +1,8 @@
+kaggle
+pandas 
+matplotlib
+mlflow
+scikit-learn
+xgboost 
+pathlib 
+shap

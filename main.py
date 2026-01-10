@@ -9,8 +9,5 @@ def run():
     resultados = build_pipeline(preprocessar, X_treino, y_treino)
     get_performance(resultados, X_treino, y_treino, X_teste, y_teste)
 
-def main():
-    run()
-
 if __name__ == "__main__":
-    main()
+    run()
