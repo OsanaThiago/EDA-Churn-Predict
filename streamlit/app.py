@@ -1,5 +1,10 @@
 import sys
 from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.append(str(ROOT_DIR))
+    
 import streamlit as st
 import pandas as pd
 from churnmodel import ChurnModel 
@@ -8,9 +13,6 @@ from recomendar import Recomendar
 from data import load_data, churn_baseline
 from predict import getModels
 
-ROOT_DIR = Path(__file__).resolve().parents[1]
-if str(ROOT_DIR) not in sys.path:
-    sys.path.append(str(ROOT_DIR))
 
 st.set_page_config(page_title="Churn Prediction", page_icon="📉", layout="wide")
 
@@ -43,11 +45,11 @@ estimated_salary = st.sidebar.number_input("Salário Estimado", 0.0)
 num_products = st.sidebar.slider("Número de Produtos", 0, 4)
 points_earned = st.sidebar.slider("Pontos Acumulados", int(df["Point Earned"].min()), int(df["Point Earned"].max()))
 satisfaction_score = st.sidebar.slider("Satisfaction Score", int(df["Satisfaction Score"].min()), int(df["Satisfaction Score"].max()))
-geography = st.sidebar.selectbox("País",["France", "Germany", "Spain"])
-gender = st.sidebar.selectbox("Gênero",["Male", "Female"])
-card_type = st.sidebar.selectbox("Tipo de Cartão",["Silver", "Gold", "Platinum", "Diamond"])
-has_cr_card = st.sidebar.selectbox("Possui Cartão de Crédito?",["Não", "Sim"])
-is_active_member = st.sidebar.selectbox("Membro Ativo?",["Não", "Sim"])
+geography = st.sidebar.selectbox("País", ["France", "Germany", "Spain"])
+gender = st.sidebar.selectbox("Gênero", ["Male", "Female"])
+card_type = st.sidebar.selectbox("Tipo de Cartão", ["Silver", "Gold", "Platinum", "Diamond"])
+has_cr_card = st.sidebar.selectbox("Possui Cartão de Crédito?", ["Não", "Sim"])
+is_active_member = st.sidebar.selectbox("Membro Ativo?", ["Não", "Sim"])
 
 user_info = {
     "CreditScore": credit_score,

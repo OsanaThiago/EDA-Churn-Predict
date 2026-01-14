@@ -5,7 +5,6 @@ import pandas as pd
 def load_data():
     return pd.read_csv("../data/Customer-Churn-Records.csv")
 
-
 @st.cache_data
 def churn_baseline(df):
     return df["Exited"].mean()
