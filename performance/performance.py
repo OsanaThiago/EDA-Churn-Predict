@@ -80,6 +80,8 @@ def get_performance(resultados,X_treino,y_treino,X_teste,y_teste):
       axes[2].plot(roc_treino[0], roc_treino[1], color='red')
       axes[2].plot(roc_teste[0], roc_teste[1], color='green')
       axes[2].plot([0,1], [0,1], color='black', linestyle= '--')
+      axes[2].set_xlabel("1 - Especificidade")
+      axes[2].set_ylabel("Sensibilidade")
       axes[2].legend([f"Treino: {100*auc_treino:.4f}", f"Teste: {100*auc_teste:.4f}"], loc='upper left')
       axes[2].grid(True)
 

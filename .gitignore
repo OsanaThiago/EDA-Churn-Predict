@@ -5,10 +5,9 @@ __pycache__/
 *.db
 mlartifacts
 data/
+/models
 # C extensions
 *.so
-model.ipynb
-/models/
 varia
 teste.py
 # Distribution / packaging
