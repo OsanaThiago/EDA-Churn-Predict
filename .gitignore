@@ -5,7 +5,6 @@ __pycache__/
 *.db
 mlartifacts
 data/
-/models
 # C extensions
 *.so
 varia

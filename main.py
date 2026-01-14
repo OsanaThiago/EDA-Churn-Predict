@@ -1,5 +1,5 @@
 from transform.preprocessing import preprocessing, loading_data
-from modelling.modeling import build_pipeline, models
+from modeling.modeling import build_pipeline, models
 from performance.performance import get_performance
 
 df = loading_data()
