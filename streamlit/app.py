@@ -1,26 +1,34 @@
+import sys
+from pathlib import Path
 import streamlit as st
 import pandas as pd
-import shap
+from churnmodel import ChurnModel 
+from shapservice import ShapService 
+from recomendar import Recomendar 
+from data import load_data, churn_baseline
 from predict import getModels
-from transform.preprocessing import loading_data
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.append(str(ROOT_DIR))
 
 st.set_page_config(page_title="Churn Prediction", page_icon="📉", layout="wide")
 
-@st.cache_data
-def load_data():
-    return loading_data()
-
+df = load_data()
+baseline = churn_baseline(df)
 @st.cache_resource
 def load_models():
     return getModels()
-
-df = load_data()
 pipeline, features = load_models()
 
 preprocess = pipeline.named_steps["preprocessar"]
 model = pipeline.named_steps["model"].best_estimator_
 feature_names = preprocess.get_feature_names_out().tolist()
-feature_names = [f.replace("num__","").replace("cat__","").replace("_",": ") for f in feature_names]
+feature_names = [f.replace("num__", "").replace("cat__", "").replace("_", ": ") for f in feature_names]
+
+modelservice = ChurnModel(pipeline, features, df)
+shapservice = ShapService(model, preprocess, feature_names)
+recoservice = Recomendar()
 
 st.title("📉 Predição de Churn de Clientes")
 st.markdown("Ferramenta de apoio à **decisão comercial**, com explicabilidade do modelo.")
@@ -32,7 +40,7 @@ age = st.sidebar.slider("Idade", int(df["Age"].min()), int(df["Age"].max()))
 tenure = st.sidebar.slider("Tempo como cliente (anos)", int(df["Tenure"].min()), int(df["Tenure"].max()))
 balance = st.sidebar.number_input("Saldo em Conta", 0.0)
 estimated_salary = st.sidebar.number_input("Salário Estimado", 0.0)
-num_products = st.sidebar.slider("Número de Produtos", 0, 6)
+num_products = st.sidebar.slider("Número de Produtos", 0, 4)
 points_earned = st.sidebar.slider("Pontos Acumulados", int(df["Point Earned"].min()), int(df["Point Earned"].max()))
 satisfaction_score = st.sidebar.slider("Satisfaction Score", int(df["Satisfaction Score"].min()), int(df["Satisfaction Score"].max()))
 geography = st.sidebar.selectbox("País",["France", "Germany", "Spain"])
@@ -59,50 +67,49 @@ user_info = {
 
 dados = pd.DataFrame([user_info])
 probachurn = pipeline.predict_proba(dados[features])[0, 1]
+percentil_risco = modelservice.percentil_risco(probachurn)
 
 if probachurn < 0.30:
     risco = "🟢 Baixo Risco"
-elif probachurn < 0.60:
+elif probachurn < 0.65:
     risco = "🟡 Médio Risco"
 else:
     risco = "🔴 Alto Risco"
 
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.metric("Probabilidade de Churn", f"{probachurn:.2%}")
+    st.metric("Probabilidade de Churn", f"{probachurn:.2%}", delta=f"{(probachurn - baseline):+.2%} vs média da base")
 
 with col2:
     st.metric("Classificação de Risco", risco)
+
+with col3: 
+    st.metric("Posição de Risco", f"Top {(1 - percentil_risco):.0%} da base")
 
 st.progress(min(int(probachurn * 100), 100))
 st.markdown("---")
 st.subheader("Por que esse cliente pode dar churn?")
 
-@st.cache_resource
-def load_explainer(_model):
-    return shap.TreeExplainer(_model)
+shap_df = shapservice.explain(dados)
 
-features_transformed = preprocess.transform(dados[features])
-explainer = load_explainer(model)
-shap_values = explainer.shap_values(features_transformed)
+st.markdown(f"Os principais fatores de risco estão relacionados a **{', '.join(shap_df[shap_df['Impacto'] > 0]['Feature'][:3])}**.")
+st.caption("Abaixo estão os fatores que mais influenciaram a previsão para este cliente específico.")
 
-shap_df = pd.DataFrame({"Feature": feature_names, "Impacto": shap_values[0]})
-shap_df["Impacto Absoluto"] = shap_df["Impacto"].abs()
-shap_df = shap_df.sort_values("Impacto Absoluto", ascending=False).head(6)
-shap_df["Efeito no Churn"] = shap_df["Impacto"].apply(lambda v: "Aumenta risco" if v > 0 else "Reduz risco")
+st.dataframe(shap_df[["Feature", "Efeito no Churn"]], width='stretch', hide_index=True)
 
-st.dataframe(shap_df[["Feature", "Efeito no Churn"]], use_container_width=True, hide_index=True)
+st.subheader("Principais fatores de risco")
 
-st.subheader("💡 Principais fatores de risco")
-
-for _, row in shap_df.iterrows(): # tentar percorrer o df['impacto'] em vez de iterrows
+for _, row in shap_df.iterrows():
     if row["Impacto"] > 0:
-        st.write(f"🔴**{row['Feature']}** está aumentando o risco de churn")
+        st.write(f"🔴 **{row['Feature']}** está aumentando o risco de churn")
     else:
         st.write(f"🟢 **{row['Feature']}** ajuda na retenção do cliente")
 
+st.markdown("---")
 st.subheader("Recomendações Comerciais")
+
+recomendacoes = recoservice.recomendacao(probachurn,shap_df)
 
 if probachurn > 0.60:
     st.error("🔴 Cliente com ALTO risco de churn")
@@ -117,6 +124,9 @@ else:
     st.success("🟢 Cliente com BAIXO risco")
     st.write("- Manter relacionamento")
     st.write("- Cross-sell de produtos")
+
+for rec in recomendacoes:
+    st.write(f'- {rec}')
 
 st.markdown("---")
 st.subheader("Resumo Executivo")
