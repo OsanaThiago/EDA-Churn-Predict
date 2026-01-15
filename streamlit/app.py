@@ -13,11 +13,11 @@ from recomendar import Recomendar
 from data import load_data, churn_baseline
 from predict import getModels
 
-
 st.set_page_config(page_title="Churn Prediction", page_icon="📉", layout="wide")
 
 df = load_data()
 baseline = churn_baseline(df)
+
 @st.cache_resource
 def load_models():
     return getModels()
