@@ -15,19 +15,18 @@ from predict import getModels
 
 st.set_page_config(page_title="Churn Prediction", page_icon="📉", layout="wide")
 
-@st.cache_data(show_spinner="Inicializando data...")
+@st.cache_data
 def loading_data():
     return load_data()
 df = loading_data()
 baseline = churn_baseline(df)
 
-
-@st.cache_resource(show_spinner="Inicializando model...")
+@st.cache_resource
 def loading_model():
     return getModels()
 pipeline, features = loading_model()
 
-@st.cache_resource(show_spinner="Inicializando features...")
+@st.cache_resource
 def load_modelfeature():
     preprocess = pipeline.named_steps["preprocessar"]
     feature_names = preprocess.get_feature_names_out().tolist()
@@ -37,7 +36,7 @@ def load_modelfeature():
 
 preprocess, model, feature_names = load_modelfeature()
 
-@st.cache_resource(show_spinner="Inicializando services...")
+@st.cache_resource
 def load_services(_pipeline, _model, _preprocess, feature_names, df, features):
     modelservice = ChurnModel(pipeline, features, df)
     shapservice = ShapService(model, preprocess, feature_names)

@@ -36,7 +36,7 @@ Esse desbalanceamento foi um fator determinante para a escolha do Recall como m�
 
 ## 🧰 Principais Bibliotecas Utilizadas
 
-- pandas, numpy — manipulação de dados
+- pandas — manipulação de dados
 
 - matplotlib, seaborn — visualização
 
@@ -60,6 +60,8 @@ EDA-Churn-Predict/
 │   ├── eda.ipynb             # Análise Exploratória de Dados (EDA)
 │   ├── model.ipynb           # Modelagem, tuning e MLflow
 │
+├── data/                   # Dataset do projeto
+│    └── Customer-Churn-Records.csv
 ├── models/                   # Arquivo com o modelo de ML
 │    └── model.pkl
 │
@@ -94,10 +96,9 @@ A modelagem está concentrada em:
 
 ### Principais etapas
 
-- Pipeline de pré-processamento (variáveis numéricas e categóricas)
-- Teste de múltiplos algoritmos
-- Otimização de hiperparâmetros com `GridSearchCV`
-- Métrica principal: **Recall**
+- Pipeline de pré-processamento das variáveis
+- Teste de múltiplos algoritmos com otimização de hiperparâmetros com `GridSearchCV`
+- Analise de performance
 - Rastreamento de experimentos com **MLflow**
 
 ### 📌 Por que Recall?

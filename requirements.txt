@@ -1,7 +1,7 @@
 kaggle
 pandas 
 matplotlib
-#mlflow
+mlflow
 scikit-learn
 xgboost 
 pathlib 
