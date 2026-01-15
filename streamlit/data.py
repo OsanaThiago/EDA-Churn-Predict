@@ -1,9 +1,12 @@
 import streamlit as st
 import pandas as pd
+from transform.preprocessing import loading_data
+
+df = loading_data()
 
 @st.cache_data
 def load_data():
-    return pd.read_csv("../data/Customer-Churn-Records.csv")
+    return df
 
 @st.cache_data
 def churn_baseline(df):
