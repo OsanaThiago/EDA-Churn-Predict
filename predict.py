@@ -18,7 +18,7 @@ def getModels():
 
         model = mlflow.sklearn.load_model(f'models:/bestXGB/{latest_version}')
 
-        joblib.dump(model, model_path)
+        joblib.dump(model, model_path,compress=3)
 
     features = model.feature_names_in_
 
