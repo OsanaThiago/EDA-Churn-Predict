@@ -15,22 +15,37 @@ from predict import getModels
 
 st.set_page_config(page_title="Churn Prediction", page_icon="📉", layout="wide")
 
-df = load_data()
+@st.cache_data
+def loading_data():
+    return load_data()
+
+df = loading_data()
 baseline = churn_baseline(df)
 
 @st.cache_resource
-def load_models():
+def loading_model():
     return getModels()
-pipeline, features = load_models()
 
-preprocess = pipeline.named_steps["preprocessar"]
-model = pipeline.named_steps["model"].best_estimator_
-feature_names = preprocess.get_feature_names_out().tolist()
-feature_names = [f.replace("num__", "").replace("cat__", "").replace("_", ": ") for f in feature_names]
+pipeline, features = loading_model()
 
-modelservice = ChurnModel(pipeline, features, df)
-shapservice = ShapService(model, preprocess, feature_names)
-recoservice = Recomendar()
+@st.cache_resource
+def load_modelfeature():
+    preprocess = pipeline.named_steps["preprocessar"]
+    feature_names = preprocess.get_feature_names_out().tolist()
+    feature_names = [f.replace("num__", "").replace("cat__", "").replace("_", ": ") for f in feature_names]
+    model = pipeline.named_steps["model"].best_estimator_
+    return preprocess, model, feature_names
+
+preprocess, model, feature_names = load_modelfeature()
+
+@st.cache_resource
+def load_services(_pipeline, _model, _preprocess, feature_names, df, features):
+    modelservice = ChurnModel(pipeline, features, df)
+    shapservice = ShapService(model, preprocess, feature_names)
+    recoservice = Recomendar()
+    return modelservice, shapservice, recoservice
+
+modelservice, shapservice, recoservice = load_services(pipeline, model, preprocess, feature_names, df, features)
 
 st.title("📉 Predição de Churn de Clientes")
 st.markdown("Ferramenta de apoio à **decisão comercial**, com explicabilidade do modelo.")

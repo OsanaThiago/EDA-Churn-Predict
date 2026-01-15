@@ -1,4 +1,3 @@
-import mlflow
 import joblib
 from pathlib import Path
 
@@ -12,6 +11,7 @@ def getModels():
         model = joblib.load(model_path)
 
     else:
+        import mlflow
         mlflow.set_tracking_uri('http://127.0.0.1:5000/')
         registered = mlflow.search_registered_models(filter_string="name = 'bestXGB'")
         latest_version = max([version.version for version in registered[0].latest_versions])
